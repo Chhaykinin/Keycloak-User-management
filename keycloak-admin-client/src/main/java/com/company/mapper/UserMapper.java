@@ -16,7 +16,6 @@ public interface UserMapper {
     @Mapping(target = "createdAt", expression = "java(mapCreatedAt(user))")
     @Mapping(target = "lastModifiedAt", expression = "java(mapLastModifiedAt(user))")
     UserResponse toUserResponse(UserRepresentation user);
-
     // 🔽 Helper methods
 
     default LocalDateTime mapCreatedAt(UserRepresentation user) {

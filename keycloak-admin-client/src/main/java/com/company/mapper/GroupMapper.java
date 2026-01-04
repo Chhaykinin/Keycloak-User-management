@@ -10,4 +10,5 @@ public interface GroupMapper {
     @Mapping(target = "groupId", source = "id")
     @Mapping(target = "groupName", source = "name")
     GroupResponse toGroupResponse(GroupRepresentation groupRepresentation);
+
 }

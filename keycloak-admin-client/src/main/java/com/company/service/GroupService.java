@@ -16,4 +16,10 @@ public interface GroupService {
     UserGroupResponse createUserToGroup(String userId, String groupId);
 
     GroupUserResponse getGroupUser(String groupId);
+
+    GroupResponse updateGroup(String groupId, GroupRequest groupRequest);
+
+    void deleteGroup(String groupId);
+
+    GroupResponse getGroupById(String groupId);
 }

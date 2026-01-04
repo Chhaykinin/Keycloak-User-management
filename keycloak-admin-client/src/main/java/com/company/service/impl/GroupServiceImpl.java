@@ -99,7 +99,7 @@ public class GroupServiceImpl implements GroupService {
         GroupRepresentation groupRepresentation;
         try {
             groupRepresentation = groupsResource.group(groupId).toRepresentation();
-        } catch (jakarta.ws.rs.NotFoundException ex) {
+        } catch (NotFoundException ex) {
             throw new ResourceNotFoundException("Group not found with id: " + groupId);
         }
 
@@ -120,5 +120,37 @@ public class GroupServiceImpl implements GroupService {
                 .build();
     }
 
+    @Override
+    public GroupResponse updateGroup(String groupId, GroupRequest groupRequest) {
+        RealmResource realmResource = keycloak.realm(realm);
+        GroupsResource groupsResource = realmResource.groups();
+        GroupRepresentation existingGroup =groupsResource.group(groupId).toRepresentation();
+        existingGroup.setName(groupRequest.groupName());
+        // saving to keycloak
+        groupsResource.group(groupId).update(existingGroup);
+        return groupMapper.toGroupResponse(existingGroup);
+    }
 
+    @Override
+    public void deleteGroup(String groupId) {
+        RealmResource realmResource = keycloak.realm(realm);
+        GroupsResource groupsResource = realmResource.groups();
+        try {
+            groupsResource.group(groupId).remove();
+        } catch (NotFoundException ex) {
+            throw new ResourceNotFoundException("Group not found with id: " + groupId);
+        }
+    }
+
+    @Override
+    public GroupResponse getGroupById(String groupId) {
+        RealmResource realmResource = keycloak.realm(realm);
+        GroupsResource groupsResource = realmResource.groups();
+        try {
+            GroupRepresentation groupRepresentation = groupsResource.group(groupId).toRepresentation();
+            return groupMapper.toGroupResponse(groupRepresentation);
+        } catch (NotFoundException ex) {
+            throw new ResourceNotFoundException("Group not found with id: " + groupId);
+        }
+    }
 }

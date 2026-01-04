@@ -52,4 +52,24 @@ public class GroupController {
         return ResponseEntity.ok(APIResponseUtil.apiResponse(groupUserResponse, HttpStatus.OK));
     }
 
+    @PutMapping("{groupId}")
+    public ResponseEntity<ApiResponse<GroupResponse>> updateGroup(@PathVariable String groupId,@Valid @RequestBody GroupRequest groupRequest
+    ){
+        GroupResponse groupResponse= groupService.updateGroup(groupId,groupRequest);
+        return ResponseEntity.ok(APIResponseUtil.apiResponse(groupResponse, HttpStatus.OK));
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<?>> deleteGroup(@PathVariable String groupId) {
+        groupService.deleteGroup(groupId);
+        return ResponseEntity.ok(APIResponseUtil
+                .apiResponse("Group deleted successfully", HttpStatus.OK));
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<GroupResponse>> getGroupById(@PathVariable String groupId) {
+        GroupResponse groupResponse = groupService.getGroupById(groupId);
+        return ResponseEntity.ok(APIResponseUtil.apiResponse(groupResponse, HttpStatus.OK));
+    }
+
 }
