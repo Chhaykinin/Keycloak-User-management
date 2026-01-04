@@ -1,0 +1,15 @@
+server:
+  port: 9091
+  error:
+    include-stacktrace: never
+spring:
+  application:
+    name: keycloak-admin-client
+  config:
+    import: optional:configserver:http://localhost:8888
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+
+

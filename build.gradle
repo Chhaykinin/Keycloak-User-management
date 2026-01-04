@@ -1,0 +1,117 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.4'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+allprojects {
+    group = 'com.api'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    ext {
+        // Centralized version management for easier updates
+        set('springCloudVersion', "2023.0.3")
+        set('mapstruct', "1.5.5.Final")
+        set('springdocVersion', "2.6.0")
+        set('resteasyVersion', "6.2.10.Final")
+        set('keycloakVersion', "25.0.4")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+    dependencies {
+        // Common dependencies for all projects
+        if (!project.name.contains("gateway")){
+            implementation 'org.springframework.boot:spring-boot-starter-web'
+        }
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        // Lombok
+        annotationProcessor "org.projectlombok:lombok"
+        compileOnly "org.projectlombok:lombok"
+        //mapstruct-processor
+        compileOnly "org.mapstruct:mapstruct:${mapstruct}"
+        annotationProcessor "org.mapstruct:mapstruct-processor:${mapstruct}"
+        // Development dependencies
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+        // OpenAPI documentation
+        implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+        implementation "org.springdoc:springdoc-openapi-starter-webmvc-api:${springdocVersion}"
+
+        // Zipkin, Micrometer, and Resilience4j
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'io.github.openfeign:feign-micrometer:13.4'
+        // Conditional dependencies based on project names
+        if (!project.name.contains("server") && !project.name.contains("gateway") ){
+            // Spring Cloud and OAuth2
+            implementation 'org.springframework.cloud:spring-cloud-starter-config'
+            implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+            // Eureka Client
+            implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+        }
+        if (project.name.contains('keycloak-admin-client')) {
+            // Keycloak and RESTEasy for specific services
+            implementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
+            implementation "org.jboss.resteasy:resteasy-client:${resteasyVersion}"
+        }
+        if (project.name.contains('task-service')) {
+            // JPA, PostgreSQL and OpenFeign  dependencies for the task service
+            implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+            runtimeOnly 'org.postgresql:postgresql'
+            implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+        }
+        if (project.name.contains('config-server')) {
+            // Spring Cloud Config Server dependency
+            implementation 'org.springframework.cloud:spring-cloud-config-server'
+        }
+        if (project.name.contains('eureka-server')) {
+            // Eureka Server dependency
+            implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+        }
+
+        if (project.name.contains('gateway')) {
+            // Gateway and WebFlux dependencies
+            implementation 'org.springframework.cloud:spring-cloud-starter-config'
+            implementation 'org.springframework.boot:spring-boot-starter-webflux'
+            implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
+            implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+            implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+            // Eureka Client
+            implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+        }
+    }
+}
+
